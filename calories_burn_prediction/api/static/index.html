@@ -4,124 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calories Burn Predictor</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #111115;
-            --surface-color: #2b2b36;
-            --text-main: #ffffff;
-            --text-muted: #a1a1aa;
-            --primary: #3b82f6;
-            --border: #3f3f46;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 40px 20px;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #111115;
+            color: #ffffff;
             display: flex;
             justify-content: center;
-            min-height: 100vh;
+            padding: 50px 20px;
         }
-
         .container {
             width: 100%;
             max-width: 600px;
         }
-
         h1 {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
-
         .subtitle {
-            font-size: 1rem;
+            font-size: 0.95rem;
             margin-bottom: 30px;
         }
-
         .form-group {
             margin-bottom: 20px;
         }
-
         label {
             display: block;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-bottom: 8px;
-            font-weight: 500;
         }
-
-        input, select {
+        .input-wrapper {
+            position: relative;
             width: 100%;
-            background-color: var(--surface-color);
-            border: 1px solid transparent;
-            color: var(--text-main);
-            padding: 12px 16px;
+            background-color: #24242b;
             border-radius: 6px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            font-family: inherit;
+            display: flex;
+            align-items: center;
+        }
+        .input-wrapper input, .input-wrapper select {
+            width: 100%;
+            background-color: transparent;
+            border: none;
+            color: #ffffff;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            outline: none;
             appearance: none;
-            transition: border 0.2s;
+            -moz-appearance: textfield;
+        }
+        /* Hide default spin buttons */
+        .input-wrapper input::-webkit-outer-spin-button,
+        .input-wrapper input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
         
-        input:focus, select:focus {
-            outline: none;
-            border: 1px solid var(--primary);
+        /* Custom Stepper Buttons for number inputs */
+        .stepper {
+            display: flex;
+            align-items: center;
+            padding-right: 12px;
+            gap: 12px;
+            color: #a1a1aa;
         }
-
-        select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
-        }
-
-        button {
-            background-color: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 500;
+        .step-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
             cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.2s;
+            font-size: 1.2rem;
+            font-weight: bold;
         }
-
-        button:hover {
+        /* Chevron for select */
+        .chevron {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        /* Predict Button */
+        button[type="submit"] {
+            background-color: transparent;
+            border: 1px solid #3f3f46;
+            color: #ffffff;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button[type="submit"]:hover {
             background-color: rgba(255, 255, 255, 0.05);
         }
-
-        #result {
+        
+        #result-box {
             margin-top: 30px;
+            display: none;
+            background-color: #24242b;
             padding: 20px;
-            background-color: var(--surface-color);
-            border-radius: 8px;
-            display: none;
-            text-align: center;
+            border-radius: 6px;
+            border: 1px solid #3f3f46;
         }
-
-        #result h2 {
-            margin: 0;
-            font-size: 2rem;
+        #result-val {
+            font-size: 1.5rem;
+            font-weight: bold;
             color: #4ade80;
-        }
-        
-        #result p {
-            margin: 5px 0 0 0;
-            color: var(--text-muted);
-        }
-        
-        .error-message {
-            color: #ef4444;
-            margin-top: 20px;
-            display: none;
         }
     </style>
 </head>
@@ -132,65 +126,116 @@
     <div class="subtitle">Enter workout details</div>
 
     <form id="predictionForm">
-        <div class="form-group">
-            <label for="duration">Duration (in minutes)</label>
-            <input type="number" id="duration" placeholder="e.g. 45" required min="1" max="300">
-        </div>
         
         <div class="form-group">
-            <label for="heart_rate">Average Heart Rate (bpm)</label>
-            <input type="number" id="heart_rate" placeholder="e.g. 145" required min="40" max="220">
-        </div>
-        
-        <div class="form-group">
-            <label for="body_temp">Body Temperature (°C)</label>
-            <input type="number" step="0.1" id="body_temp" placeholder="e.g. 39.2" required min="35.0" max="42.0">
-        </div>
-
-        <div class="form-group">
-            <label for="age">Age (Years)</label>
-            <input type="number" id="age" placeholder="e.g. 28" required min="18" max="100">
+            <label>Duration (in mins)</label>
+            <div class="input-wrapper">
+                <input type="number" id="duration" value="45" min="1" max="300" required>
+                <div class="stepper">
+                    <button type="button" class="step-btn" onclick="step('duration', -1)">−</button>
+                    <button type="button" class="step-btn" onclick="step('duration', 1)">+</button>
+                </div>
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="gender">Gender</label>
-            <select id="gender" required>
-                <option value="male">Male</option>
-                <option value="female" selected>Female</option>
-            </select>
+            <label>Average Heart Rate (bpm)</label>
+            <div class="input-wrapper">
+                <input type="number" id="heart_rate" value="145" min="40" max="220" required>
+                <div class="stepper">
+                    <button type="button" class="step-btn" onclick="step('heart_rate', -1)">−</button>
+                    <button type="button" class="step-btn" onclick="step('heart_rate', 1)">+</button>
+                </div>
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="height">Height (in cm)</label>
-            <input type="number" step="0.1" id="height" placeholder="e.g. 165" required min="100" max="250">
+            <label>Body Temperature (°C)</label>
+            <div class="input-wrapper">
+                <input type="number" id="body_temp" value="39.2" step="0.1" min="35.0" max="42.0" required>
+                <div class="stepper">
+                    <button type="button" class="step-btn" onclick="step('body_temp', -0.1)">−</button>
+                    <button type="button" class="step-btn" onclick="step('body_temp', 0.1)">+</button>
+                </div>
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="weight">Weight (in kg)</label>
-            <input type="number" step="0.1" id="weight" placeholder="e.g. 65" required min="30" max="200">
+            <label>Age</label>
+            <div class="input-wrapper">
+                <input type="number" id="age" value="28" min="18" max="100" required>
+                <div class="stepper">
+                    <button type="button" class="step-btn" onclick="step('age', -1)">−</button>
+                    <button type="button" class="step-btn" onclick="step('age', 1)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Gender</label>
+            <div class="input-wrapper">
+                <select id="gender" required>
+                    <option value="male">Male</option>
+                    <option value="female" selected>Female</option>
+                </select>
+                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Height (in cm)</label>
+            <div class="input-wrapper">
+                <input type="number" id="height" value="165" step="0.5" min="100" max="250" required>
+                <div class="stepper">
+                    <button type="button" class="step-btn" onclick="step('height', -0.5)">−</button>
+                    <button type="button" class="step-btn" onclick="step('height', 0.5)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Weight (in kg)</label>
+            <div class="input-wrapper">
+                <input type="number" id="weight" value="65" step="0.5" min="30" max="200" required>
+                <div class="stepper">
+                    <button type="button" class="step-btn" onclick="step('weight', -0.5)">−</button>
+                    <button type="button" class="step-btn" onclick="step('weight', 0.5)">+</button>
+                </div>
+            </div>
         </div>
 
         <button type="submit">Predict</button>
     </form>
-
-    <div id="result">
-        <h2 id="caloriesValue">--</h2>
-        <p>kcal burned</p>
-    </div>
     
-    <div id="errorBox" class="error-message"></div>
+    <div id="result-box">
+        <div id="result-val">--</div>
+        <div style="font-size: 0.9rem; color: #a1a1aa; margin-top: 4px;">Predicted Calories Burned</div>
+    </div>
 </div>
 
 <script>
+    function step(id, amount) {
+        const el = document.getElementById(id);
+        const val = parseFloat(el.value);
+        if (!isNaN(val)) {
+            // Fix JS floating point drift for steps like 0.1
+            const precision = el.step && el.step.includes('.') ? el.step.split('.')[1].length : 0;
+            const newVal = parseFloat((val + amount).toFixed(precision));
+            
+            if (el.max && newVal > parseFloat(el.max)) return;
+            if (el.min && newVal < parseFloat(el.min)) return;
+            
+            el.value = newVal;
+        }
+    }
+
     document.getElementById('predictionForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const resultBox = document.getElementById('result');
-        const caloriesValue = document.getElementById('caloriesValue');
-        const errorBox = document.getElementById('errorBox');
+        const resultBox = document.getElementById('result-box');
+        const resultVal = document.getElementById('result-val');
         
         resultBox.style.display = 'none';
-        errorBox.style.display = 'none';
         
         const payload = {
             age: parseInt(document.getElementById('age').value),
@@ -205,24 +250,25 @@
         try {
             const response = await fetch('/predict', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                caloriesValue.innerText = data.predicted_calories;
+                resultVal.innerText = data.predicted_calories + " kcal";
+                resultVal.style.color = "#4ade80";
                 resultBox.style.display = 'block';
             } else {
-                errorBox.innerText = "Error: " + (data.detail || "Unable to compute.");
-                errorBox.style.display = 'block';
+                resultVal.innerText = "Error: " + (data.detail || "Unable to compute");
+                resultVal.style.color = "#ef4444";
+                resultBox.style.display = 'block';
             }
         } catch (error) {
-            errorBox.innerText = "Error: Network issue or API down.";
-            errorBox.style.display = 'block';
+            resultVal.innerText = "Error: API unreachable.";
+            resultVal.style.color = "#ef4444";
+            resultBox.style.display = 'block';
         }
     });
 </script>
