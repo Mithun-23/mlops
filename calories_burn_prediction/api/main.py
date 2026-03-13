@@ -16,16 +16,15 @@ ml_models = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Load the ML model during startup
-    print("Loading MLflow model from registry (latest version)...")
+    # Load the ML model directly from the embedded artifact folder during startup
+    print("Loading extracted ML model directly from folder...")
     try:
-        model_uri = "models:/calories_burn_model/latest"
-        model = mlflow.pyfunc.load_model(model_uri)
+        model_path = os.path.join(BASE_DIR, "api", "model")
+        model = mlflow.pyfunc.load_model(model_path)
         ml_models["model"] = model
         print("Model successfully loaded into memory!")
     except Exception as e:
         print(f"Error loading model: {e}")
-        # Not raising here allows the app to start even if DB is missing during standard lint/tests
     yield
     # Clean up on shutdown
     ml_models.clear()
