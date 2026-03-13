@@ -24,7 +24,10 @@ async def lifespan(app: FastAPI):
         ml_models["model"] = model
         print("Model successfully loaded into memory!")
     except Exception as e:
-        print(f"Error loading model: {e}")
+        import traceback
+        error_trace = traceback.format_exc()
+        ml_models["error"] = error_trace
+        print(f"Error loading model:\n{error_trace}")
     yield
     # Clean up on shutdown
     ml_models.clear()
@@ -44,7 +47,11 @@ def serve_frontend():
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "model_loaded": "model" in ml_models}
+    return {
+        "status": "healthy", 
+        "model_loaded": "model" in ml_models,
+        "error": ml_models.get("error")
+    }
 
 @app.post("/predict", response_model=CaloriesPredictionResponse)
 def predict_calories(request: CaloriesPredictionRequest):
