@@ -1,0 +1,23 @@
+artifact_path: /Users/mithun/College/Projects/Mlops/calories_burn_prediction/mlruns/1/models/m-e58a70339f7b4b5f9234639a30fd4d39/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.5
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.10.1
+model_id: m-e58a70339f7b4b5f9234639a30fd4d39
+model_size_bytes: 2448
+model_uuid: m-e58a70339f7b4b5f9234639a30fd4d39
+prompts: null
+run_id: 59e8faca9ee14c42a52fc85f31de2c10
+utc_time_created: '2026-03-13 06:48:11.272314'
