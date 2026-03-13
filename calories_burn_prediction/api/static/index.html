@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calories Burn Predictor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #111115;
+            --surface-color: #2b2b36;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+            --primary: #3b82f6;
+            --border: #3f3f46;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            background-color: var(--surface-color);
+            border: 1px solid transparent;
+            color: var(--text-main);
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            font-family: inherit;
+            appearance: none;
+            transition: border 0.2s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border: 1px solid var(--primary);
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        button {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+        }
+
+        #result h2 {
+            margin: 0;
+            font-size: 2rem;
+            color: #4ade80;
+        }
+        
+        #result p {
+            margin: 5px 0 0 0;
+            color: var(--text-muted);
+        }
+        
+        .error-message {
+            color: #ef4444;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calories Burn Predictor</h1>
+    <div class="subtitle">Enter workout details</div>
+
+    <form id="predictionForm">
+        <div class="form-group">
+            <label for="duration">Duration (in minutes)</label>
+            <input type="number" id="duration" placeholder="e.g. 45" required min="1" max="300">
+        </div>
+        
+        <div class="form-group">
+            <label for="heart_rate">Average Heart Rate (bpm)</label>
+            <input type="number" id="heart_rate" placeholder="e.g. 145" required min="40" max="220">
+        </div>
+        
+        <div class="form-group">
+            <label for="body_temp">Body Temperature (°C)</label>
+            <input type="number" step="0.1" id="body_temp" placeholder="e.g. 39.2" required min="35.0" max="42.0">
+        </div>
+
+        <div class="form-group">
+            <label for="age">Age (Years)</label>
+            <input type="number" id="age" placeholder="e.g. 28" required min="18" max="100">
+        </div>
+
+        <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" required>
+                <option value="male">Male</option>
+                <option value="female" selected>Female</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="height">Height (in cm)</label>
+            <input type="number" step="0.1" id="height" placeholder="e.g. 165" required min="100" max="250">
+        </div>
+
+        <div class="form-group">
+            <label for="weight">Weight (in kg)</label>
+            <input type="number" step="0.1" id="weight" placeholder="e.g. 65" required min="30" max="200">
+        </div>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    <div id="result">
+        <h2 id="caloriesValue">--</h2>
+        <p>kcal burned</p>
+    </div>
+    
+    <div id="errorBox" class="error-message"></div>
+</div>
+
+<script>
+    document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const resultBox = document.getElementById('result');
+        const caloriesValue = document.getElementById('caloriesValue');
+        const errorBox = document.getElementById('errorBox');
+        
+        resultBox.style.display = 'none';
+        errorBox.style.display = 'none';
+        
+        const payload = {
+            age: parseInt(document.getElementById('age').value),
+            gender: document.getElementById('gender').value,
+            height: parseFloat(document.getElementById('height').value),
+            weight: parseFloat(document.getElementById('weight').value),
+            duration: parseInt(document.getElementById('duration').value),
+            heart_rate: parseInt(document.getElementById('heart_rate').value),
+            body_temp: parseFloat(document.getElementById('body_temp').value)
+        };
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                caloriesValue.innerText = data.predicted_calories;
+                resultBox.style.display = 'block';
+            } else {
+                errorBox.innerText = "Error: " + (data.detail || "Unable to compute.");
+                errorBox.style.display = 'block';
+            }
+        } catch (error) {
+            errorBox.innerText = "Error: Network issue or API down.";
+            errorBox.style.display = 'block';
+        }
+    });
+</script>
+
+</body>
+</html>

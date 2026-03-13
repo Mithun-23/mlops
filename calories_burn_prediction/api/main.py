@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import mlflow.pyfunc
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 from .schemas import CaloriesPredictionRequest, CaloriesPredictionResponse
 
@@ -35,7 +37,13 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "api", "static")), name="static")
+
 @app.get("/")
+def serve_frontend():
+    return FileResponse(os.path.join(BASE_DIR, "api", "static", "index.html"))
+
+@app.get("/health")
 def health_check():
     return {"status": "healthy", "model_loaded": "model" in ml_models}
 
