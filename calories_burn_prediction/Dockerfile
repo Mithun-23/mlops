@@ -19,5 +19,5 @@ COPY . .
 ENV PORT=8000
 EXPOSE $PORT
 
-# Run the FastAPI server
-CMD uvicorn api.main:app --host 0.0.0.0 --port $PORT
+# Run the Streamlit server
+CMD streamlit run app.py --server.port $PORT --server.address 0.0.0.0
